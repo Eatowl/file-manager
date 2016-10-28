@@ -3,21 +3,20 @@
 #include <panel.h>
 #include <string.h>
 
-#define NLINES 37
-#define NCOLS 67
-
 struct dirent *entry;
 
-char test_array[2555][25555]; // позор №1
-char directory[25555] = "/";  // позор №2
+int row, col;
+char test_array[2555][25555];
+char directory[25555] = "/", 
+     save_directory[25555] = "/", 
+     temporary_directory[25555] = "/";  
 
 void init_wins(WINDOW **wins, int n);
-void init_wins_table(WINDOW **wins, int n);
 
 int main()
-{	
-    WINDOW *my_wins[5];
-    PANEL  *my_panels[5];
+{   
+    WINDOW *my_wins[3];
+    PANEL  *my_panels[3];
     PANEL  *top;
     int ch, i;
 
@@ -26,13 +25,19 @@ int main()
     noecho();
     keypad(stdscr, TRUE);
 
+    getmaxyx(stdscr, row, col);
+
+    if (col % 2 != 0)
+
+        col -= 1;
+
     curs_set(0);
 
     if (!has_colors())
     {
-		endwin();
-		printf("\nОшибка! Не поддерживаются цвета\n");
-		return 1;
+        endwin();
+        printf("\nОшибка! Не поддерживаются цвета\n");
+        return 1;
     }
 
     start_color();
@@ -41,44 +46,41 @@ int main()
 
     // инициализируются окна
     init_wins(my_wins, 2);
-    init_wins_table(my_wins, 4);
 
-    my_wins[4] = newwin(3, 138, 0, 2);
-    wbkgdset(my_wins[4], COLOR_PAIR(1));
-    wclear(my_wins[4]);
+    my_wins[2] = newwin(3, col, 0, 0);
+    wbkgdset(my_wins[2], COLOR_PAIR(1));
+    wclear(my_wins[2]);
 
 
-    for(i = 2; i < 5; ++i)
+    for(i = 0; i < 3; ++i)
 
-		box(my_wins[i], 0, 0);
+        box(my_wins[i], 0, 0);
 
-    for (i = 0; i < 5; ++i) 
+    for (i = 0; i < 3; ++i) 
 
         my_panels[i] = new_panel(my_wins[i]);
-
 
     // устанавливаем указатели на следующее окно
     // для перехода при нажатии Tab на следующее окно
     set_panel_userptr(my_panels[0], my_panels[1]);
     set_panel_userptr(my_panels[1], my_panels[0]);
 
-    mvwprintw(my_wins[4], 1, 60, "Tab - next panel F2 - exit");
+    mvwprintw(my_wins[2], 1, 1, "Tab - next panel | F2 - exit | Enter - choise |");
 
     update_panels();
     doupdate();
 
-    top = my_panels[1];
+    top = my_panels[0];
 
     keypad(my_wins[0], TRUE);
 
     unsigned choice = 0; //Выбор пользователя
-    bool exit = false;
+    bool exit = false, display_wins_1 = true;
 
     while ( !exit )
     { 
 
-        wclear(my_wins[0]);
-        wclear(my_wins[1]);
+        wclear(panel_window(top));
 
         DIR *dir;
         int count = 0;
@@ -86,21 +88,32 @@ int main()
 
         for (unsigned i = 0; (entry = readdir(dir)) != NULL; ++i)
         {
+
             if ( i == choice ) { 
 
-                waddch(my_wins[0],'>'); 
+                mvwaddch(panel_window(top), i + 1, 1, '>' | A_STANDOUT); 
 
             } else {         
 
-                waddch(my_wins[0],' ');
+                mvwaddch(panel_window(top), i + 1, 1, ' ');
 
             }
 
             strcpy(test_array[count], entry->d_name);
-            wprintw(my_wins[0], "%s\n", entry->d_name);
-            wprintw(my_wins[1], "%s\n", entry->d_name);
+            mvwprintw(panel_window(top), i + 1, 2, "%s\n", entry->d_name);
+
+            if (display_wins_1 == true) { // вывод директории на второй панели
+
+                mvwprintw(my_wins[1], i + 1, 2, "%s\n", entry->d_name);
+
+            }
+
             count++;
         }
+
+        display_wins_1 = false;
+        box(my_wins[0], 0, 0);
+        box(my_wins[1], 0, 0);
 
         update_panels();
         doupdate();
@@ -115,8 +128,12 @@ int main()
                 break;
 
             case '\t': // переход на следующую панель
+
                 top = (PANEL *)panel_userptr(top);
                 top_panel(top);
+                strcpy(temporary_directory, save_directory);
+                strcpy(save_directory, directory);
+                strcpy(directory, temporary_directory);
                 break;
 
             case '\n': 
@@ -144,10 +161,10 @@ int main()
     }
 
     // уничтожение созданных панелей и окон
-    for(i = 0; i < 5; ++i)
+    for(i = 0; i < 3; ++i)
     {
-		del_panel(my_panels[i]);
-		delwin(my_wins[i]);
+        del_panel(my_panels[i]);
+        delwin(my_wins[i]);
     }
 
     endwin();
@@ -157,36 +174,18 @@ int main()
 
 void init_wins(WINDOW **wins, int n)
 {
-    int x, y, i;
+    int x, i;
 
-    y = 4;
-    x = 3;
+    x = 0;
 
     for(i = 0; i < n; ++i)
     {
-		wins[i] = newwin(NLINES, NCOLS, y, x);
-		wbkgdset(wins[i], COLOR_PAIR(1));
-		wclear(wins[i]);
-		wrefresh(wins[i]);
-			
-		y += 0;
-		x += 69;
-    }
-}
 
-void init_wins_table(WINDOW **wins, int n)  // да это очередной стыд и позор, но его скоро не будет
-{
-    int x, i;
-
-    x = 2;
-
-    for(i = 2; i < n; ++i)
-    {
-        wins[i] = newwin(39, 69, 3, x);
+        wins[i] = newwin(row - 3, col / 2, 3, x);
         wbkgdset(wins[i], COLOR_PAIR(1));
         wclear(wins[i]);
         wrefresh(wins[i]);
 
-        x += 69;
+        x += col / 2;
     }
 }
