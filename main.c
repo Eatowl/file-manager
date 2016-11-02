@@ -9,7 +9,6 @@
 struct dirent *entry;
 
 int row, col;
-//char test_array[2555][25555];
 char save_directory[25555] = "/",
      temporary_directory[25555] = "/";
 
@@ -37,9 +36,7 @@ int main() {
     init_pair(2, COLOR_GREEN, COLOR_RED);
 
     // инициализируются окна
-
     getmaxyx(stdscr, row, col);
-
     if (col % 2 != 0) {
         col -= 1;
     }
@@ -51,17 +48,14 @@ int main() {
     wclear(my_wins[2]);
 
     // отрисовка рамки в окнах
-
     for (int i = 0; i < 3; ++i)
         box(my_wins[i], 0, 0);
 
     // создание панелей, на основе окон
-
     for (int i = 0; i < 3; ++i)
         my_panels[i] = new_panel(my_wins[i]);
 
     // ссылки между панелями
-
     set_panel_userptr(my_panels[0], my_panels[1]);
     set_panel_userptr(my_panels[1], my_panels[0]);
 
