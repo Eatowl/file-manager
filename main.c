@@ -35,7 +35,6 @@ int main() {
         printf("\nОшибка! Не поддерживаются цвета\n");
         return 1;
     }
-
     start_color();
     init_pair(1, COLOR_WHITE, COLOR_BLUE);
     init_pair(2, COLOR_GREEN, COLOR_RED);
@@ -45,7 +44,6 @@ int main() {
     if (col % 2 != 0) {
         col -= 1;
     }
-
     init_wins(my_wins, 2);
     my_wins[2] = newwin(3, col, 0, 0);
     wbkgdset(my_wins[2], COLOR_PAIR(1));
@@ -74,12 +72,10 @@ int main() {
     malloc_all_array();
 
     while ( !exit ) {
-        wclear(panel_window(top));
-        unsigned wordCounter = 0;
-        words = (char**) malloc(size*sizeof(char*));
-
         DIR *dir;
-        unsigned i;
+        unsigned i, wordCounter = 0;
+        wclear(panel_window(top));
+        words = (char**) malloc(size*sizeof(char*));
         dir = opendir(directory);
 
         for (i = 0; (entry = readdir(dir)) != NULL; ++i) {
@@ -108,7 +104,6 @@ int main() {
         display_wins_1 = false;
         box(my_wins[0], 0, 0);
         box(my_wins[1], 0, 0);
-
         update_panels();
         doupdate();
         int ch = getch();
@@ -151,15 +146,12 @@ int main() {
 }
 
 void init_wins(WINDOW **wins, int n) {
-    int x, i;
-    x = 0;
-
+    int x = 0, i;
     for (i = 0; i < n; ++i) {
         wins[i] = newwin(row - 3, col / 2, 3, x);
         wbkgdset(wins[i], COLOR_PAIR(1));
         wclear(wins[i]);
         wrefresh(wins[i]);
-
         x += col / 2;
     }
 }
@@ -201,8 +193,6 @@ void free_all() {
     free(directory);
     free(save_directory);
     free(temporary_directory);
-
-    // уничтожение созданных панелей и окон
     for (int i = 0; i < 3; ++i) {
         del_panel(my_panels[i]);
         delwin(my_wins[i]);
