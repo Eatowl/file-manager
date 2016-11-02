@@ -1,22 +1,29 @@
+#include <string.h>
+#include <stdlib.h>
 #include <ncurses.h>
 #include <dirent.h>
 #include <panel.h>
-#include <string.h>
-#include <stdlib.h>
 
-#define SIZE_INCREMENT 10 // stop
+#define SIZE_INCREMENT 10
 
 struct dirent *entry;
-
 int row, col;
+char **words;
+char *directory,
+     *save_directory,
+     *temporary_directory;
+
+WINDOW *my_wins[3];
+PANEL  *my_panels[3];
+PANEL  *top;
 
 void init_wins(WINDOW **wins, int n);
+void free_all();
+void malloc_all_array();
+void realloc_all_array(unsigned length);
+bool move_between_directory(unsigned length, unsigned choice);
 
 int main() {
-    WINDOW *my_wins[3];
-    PANEL  *my_panels[3];
-    PANEL  *top;
-
     initscr();
     cbreak();
     noecho();
@@ -62,36 +69,15 @@ int main() {
 
     top = my_panels[0];
 
-    unsigned choice = 0;  // Выбор пользователя
     bool exit = false, display_wins_1 = true;
-    char test[100];
-    int size1;
-    //Массив указателей на слова
-    char **words;
-    char *directory;
-    char *save_directory1;
-    char *temporary_directory1;
-    //Длина введённого слова
-    unsigned length;
-    //Размер массива слов. Для уменьшения издержек на выделение памяти 
-    //каждый раз будем увеличивать массив слов не на одно значение, а на
-    //SIZE_INCREMENT слов
+    unsigned length, choice = 0;
     unsigned size = SIZE_INCREMENT;
 
-    unsigned length1 = 0;
-
-    directory = (char*) malloc(size);
-    save_directory1 = (char*) malloc(size);
-    temporary_directory1 = (char*) malloc(size);
-    directory = strcpy(directory, "/");
-    save_directory1 = strcpy(save_directory1, "/");
-    temporary_directory1 = strcpy(temporary_directory1, "/");
+    malloc_all_array();
 
     while ( !exit ) {
         wclear(panel_window(top));
-        //Счётчик слов
         unsigned wordCounter = 0;
-
         words = (char**) malloc(size*sizeof(char*));
 
         DIR *dir;
@@ -113,19 +99,17 @@ int main() {
 
             words[i] = (char*) malloc(length + 1);
             strcpy(words[i], entry->d_name);
-            mvwprintw(panel_window(top), i + 1, 2, "%s %d %d\n", entry->d_name, length);
+            mvwprintw(panel_window(top), i + 1, 2, "%s\n", entry->d_name);
 
             if (display_wins_1 == true) {  // вывод директории на второй
                 mvwprintw(my_wins[1], i + 1, 2, "%s\n", entry->d_name);
             }
-
             wordCounter++;
         }
 
         display_wins_1 = false;
         box(my_wins[0], 0, 0);
         box(my_wins[1], 0, 0);
-        //wprintw(my_wins[2], "%s %d-%d\n", directory, strlen(directory), strlen(director));
 
         update_panels();
         doupdate();
@@ -135,37 +119,22 @@ int main() {
         switch ( ch ) {
             case KEY_F(2):
                 exit = true;
-                for (int ix = 0; ix < wordCounter; ++ix) {
-                    free(words[ix]);
+                for (int i = 0; i < wordCounter; ++i) {
+                    free(words[i]);
                 }
-                free(words);
-                free(directory);
-                free(save_directory1);
-                free(temporary_directory1);
+                free_all();
                 break;
 
             case '\t':  // переход на следующую панель
                 top = (PANEL *)panel_userptr(top);
                 top_panel(top);
-                strcpy(temporary_directory1, save_directory1);
-                strcpy(save_directory1, directory);
-                strcpy(directory, temporary_directory1);
+                strcpy(temporary_directory, save_directory);
+                strcpy(save_directory, directory);
+                strcpy(directory, temporary_directory);
                 break;
 
             case '\n':
-                length = strlen(words[choice]);
-                //wprintw(my_wins[2], "%s %d-%d\n", pdirector, strlen(pdirector), strlen(pdirector)+length+1);
-                directory = (char*) realloc(directory, strlen(directory) + length + 1);
-                save_directory1 = (char*) realloc(save_directory1, strlen(directory) + length + 1);
-                temporary_directory1 = (char*) realloc(temporary_directory1, strlen(directory) + length + 1);
-                if(directory != NULL) {
-                    strcat(directory, "/");
-                    strcat(directory, words[choice]);
-                } else {
-                    free(directory);
-                    exit = true;
-                    break;
-                }
+                exit = move_between_directory(length, choice);
                 choice = 0;
                 break;
 
@@ -181,14 +150,6 @@ int main() {
         }
         closedir(dir);
     }
-
-    // уничтожение созданных панелей и окон
-    for (int i = 0; i < 3; ++i) {
-        del_panel(my_panels[i]);
-        delwin(my_wins[i]);
-    }
-
-    endwin();
     return 0;
 }
 
@@ -204,4 +165,50 @@ void init_wins(WINDOW **wins, int n) {
 
         x += col / 2;
     }
+}
+
+void malloc_all_array() {
+    directory = (char*) malloc(SIZE_INCREMENT);
+    save_directory = (char*) malloc(SIZE_INCREMENT);
+    temporary_directory = (char*) malloc(SIZE_INCREMENT);
+    directory = strcpy(directory, "/");
+    save_directory = strcpy(save_directory, "/");
+    temporary_directory = strcpy(temporary_directory, "/");
+}
+
+void realloc_all_array(unsigned length) {
+    directory = (char*) realloc(directory, strlen(directory) + length);
+    save_directory = (char*) realloc(save_directory, strlen(directory) + length);
+    temporary_directory = (char*) realloc(temporary_directory, strlen(directory) + length);
+}
+
+bool move_between_directory(unsigned length, unsigned choice) {
+    if (strlen(directory) != 2) {
+        length = strlen(words[choice]) + 1;
+    } else {
+        length = strlen(words[choice]);
+    }
+    realloc_all_array(length);
+    if (directory != NULL) {
+        strcat(directory, "/");
+        strcat(directory, words[choice]);
+    } else {
+        free(directory);
+        return true;
+    }
+    return false;
+}
+
+void free_all() {
+    free(words);
+    free(directory);
+    free(save_directory);
+    free(temporary_directory);
+
+    // уничтожение созданных панелей и окон
+    for (int i = 0; i < 3; ++i) {
+        del_panel(my_panels[i]);
+        delwin(my_wins[i]);
+    }
+    endwin();
 }
