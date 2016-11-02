@@ -9,8 +9,6 @@
 struct dirent *entry;
 
 int row, col;
-char save_directory[25555] = "/",
-     temporary_directory[25555] = "/";
 
 void init_wins(WINDOW **wins, int n);
 
@@ -71,6 +69,8 @@ int main() {
     //Массив указателей на слова
     char **words;
     char *directory;
+    char *save_directory1;
+    char *temporary_directory1;
     //Длина введённого слова
     unsigned length;
     //Размер массива слов. Для уменьшения издержек на выделение памяти 
@@ -81,7 +81,11 @@ int main() {
     unsigned length1 = 0;
 
     directory = (char*) malloc(size);
+    save_directory1 = (char*) malloc(size);
+    temporary_directory1 = (char*) malloc(size);
     directory = strcpy(directory, "/");
+    save_directory1 = strcpy(save_directory1, "/");
+    temporary_directory1 = strcpy(temporary_directory1, "/");
 
     while ( !exit ) {
         wclear(panel_window(top));
@@ -136,20 +140,24 @@ int main() {
                 }
                 free(words);
                 free(directory);
+                free(save_directory1);
+                free(temporary_directory1);
                 break;
 
             case '\t':  // переход на следующую панель
                 top = (PANEL *)panel_userptr(top);
                 top_panel(top);
-                strcpy(temporary_directory, save_directory);
-                strcpy(save_directory, directory);
-                strcpy(directory, temporary_directory);
+                strcpy(temporary_directory1, save_directory1);
+                strcpy(save_directory1, directory);
+                strcpy(directory, temporary_directory1);
                 break;
 
             case '\n':
                 length = strlen(words[choice]);
                 //wprintw(my_wins[2], "%s %d-%d\n", pdirector, strlen(pdirector), strlen(pdirector)+length+1);
                 directory = (char*) realloc(directory, strlen(directory) + length + 1);
+                save_directory1 = (char*) realloc(save_directory1, strlen(directory) + length + 1);
+                temporary_directory1 = (char*) realloc(temporary_directory1, strlen(directory) + length + 1);
                 if(directory != NULL) {
                     strcat(directory, "/");
                     strcat(directory, words[choice]);
