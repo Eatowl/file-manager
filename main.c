@@ -47,7 +47,6 @@ int main() {
     }
 
     init_wins(my_wins, 2);
-
     my_wins[2] = newwin(3, col, 0, 0);
     wbkgdset(my_wins[2], COLOR_PAIR(1));
     wclear(my_wins[2]);
@@ -68,7 +67,6 @@ int main() {
         "Tab - next panel | F2 - exit | Enter - choise |");
 
     top = my_panels[0];
-
     bool exit = false, display_wins_1 = true;
     unsigned length, choice = 0;
     unsigned size = SIZE_INCREMENT;
@@ -113,7 +111,6 @@ int main() {
 
         update_panels();
         doupdate();
-
         int ch = getch();
 
         switch ( ch ) {
