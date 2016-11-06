@@ -114,6 +114,7 @@ int main() {
         display_wins_1 = false;
         box(my_wins[0], 0, 0);
         box(my_wins[1], 0, 0);
+        // wprintw(my_wins[2]," %d\n", wordCounter);
         update_panels();
         doupdate();
         int ch = getch();
@@ -203,14 +204,14 @@ bool move_between_directory(unsigned length, unsigned choice) {
 }
 
 void sort_array(unsigned wordCounter) {
-    int size_sort;
-    size_sort = SIZE_INCREMENT;
+    unsigned size_sort = SIZE_INCREMENT;
     str = (char*) malloc(SIZE_INCREMENT);
     for (int i = 1; i < wordCounter; ++i) {
         for (int j = 0; j < wordCounter - i; ++j) {
-            if (strlen(words[j]) > size_sort 
+            if (strlen(words[j]) > size_sort
                 || strlen(words[j + 1]) > size_sort) {
                 size_sort += strlen(words[j]);
+                size_sort += strlen(words[j+1]);
                 str = (char*) realloc(str, size_sort);
             }
             if (strcmp(words[j], words[j+1]) > 0) {
@@ -220,6 +221,7 @@ void sort_array(unsigned wordCounter) {
             }
         }
     }
+    size_sort = 0;
 }
 
 void free_all() {
