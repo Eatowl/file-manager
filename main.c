@@ -9,6 +9,7 @@
 struct dirent *entry;
 int row, col;
 char **words;
+char *str;
 char *directory,
      *save_directory,
      *temporary_directory;
@@ -22,6 +23,7 @@ void free_all();
 void malloc_all_array();
 void realloc_all_array(unsigned length);
 bool move_between_directory(unsigned length, unsigned choice);
+void sort_array(unsigned wordCounter);
 
 int main() {
     initscr();
@@ -65,40 +67,48 @@ int main() {
         "Tab - next panel | F2 - exit | Enter - choise |");
 
     top = my_panels[0];
-    bool exit = false, display_wins_1 = true;
+    bool exit = false, display_wins_1 = true, update_dir = true;
     unsigned length, choice = 0;
     unsigned size = SIZE_INCREMENT;
 
     malloc_all_array();
 
-    while ( !exit ) {
-        DIR *dir;
-        unsigned i, wordCounter = 0;
-        wclear(panel_window(top));
-        words = (char**) malloc(size*sizeof(char*));
-        dir = opendir(directory);
+    unsigned i, wordCounter;
 
-        for (i = 0; (entry = readdir(dir)) != NULL; ++i) {
+    while ( !exit ) {
+        wclear(panel_window(top));
+        
+        if (update_dir != false) {
+            DIR *dir;
+            words = (char**) malloc(size*sizeof(char*));
+            dir = opendir(directory);
+
+            for (i = 0; (entry = readdir(dir)) != NULL; ++i) {
+                length = strlen(entry->d_name);
+                if (i >= size) {
+                    size += SIZE_INCREMENT;
+                    words = (char**) realloc(words, size*sizeof(char*));
+                }
+                words[i] = (char*) malloc(length + 1);
+                strcpy(words[i], entry->d_name);
+                wordCounter++;
+            }    
+            sort_array(wordCounter);
+            update_dir = false;
+            closedir(dir);
+        }
+
+        for (i = 0; i < wordCounter; ++i) {
             if ( i == choice ) {
                 mvwaddch(panel_window(top), i + 1, 1, '>' | A_STANDOUT);
             } else {
                 mvwaddch(panel_window(top), i + 1, 1, ' ');
             }
-
-            length = strlen(entry->d_name);
-            if (i >= size) {
-                size += SIZE_INCREMENT;
-                words = (char**) realloc(words, size*sizeof(char*));
-            }
-
-            words[i] = (char*) malloc(length + 1);
-            strcpy(words[i], entry->d_name);
-            mvwprintw(panel_window(top), i + 1, 2, "%s\n", entry->d_name);
+            mvwprintw(panel_window(top), i + 1, 2, "%s\n", words[i]);
 
             if (display_wins_1 == true) {  // вывод директории на второй
-                mvwprintw(my_wins[1], i + 1, 2, "%s\n", entry->d_name);
+                mvwprintw(my_wins[1], i + 1, 2, "%s\n", words[i]);
             }
-            wordCounter++;
         }
 
         display_wins_1 = false;
@@ -114,6 +124,7 @@ int main() {
                 for (int i = 0; i < wordCounter; ++i) {
                     free(words[i]);
                 }
+                wclear(panel_window(top));
                 free_all();
                 break;
 
@@ -123,11 +134,15 @@ int main() {
                 strcpy(temporary_directory, save_directory);
                 strcpy(save_directory, directory);
                 strcpy(directory, temporary_directory);
+                update_dir = true;
+                wordCounter = 0;
                 break;
 
             case '\n':
                 exit = move_between_directory(length, choice);
                 choice = 0;
+                update_dir = true;
+                wordCounter = 0;
                 break;
 
             case KEY_UP:
@@ -140,7 +155,7 @@ int main() {
                     choice++;
                 break;
         }
-        closedir(dir);
+        //closedir(dir);
     }
     return 0;
 }
@@ -188,8 +203,29 @@ bool move_between_directory(unsigned length, unsigned choice) {
     return false;
 }
 
+void sort_array(unsigned wordCounter) {
+    int size_sort;
+    size_sort = SIZE_INCREMENT;
+    str = (char*) malloc(SIZE_INCREMENT);
+    for (int i = 1; i < wordCounter; ++i) {
+        for (int j = 0; j < wordCounter - i; ++j) {
+            if (strlen(words[j]) > size_sort || strlen(words[j + 1]) > size_sort) {
+                size_sort += strlen(words[j]);
+                size_sort += strlen(words[j+1]);
+                str = (char*) realloc(str, size_sort);
+            }
+            if (strcmp(words[j], words[j+1]) > 0) {
+                strcpy(str, words[j]);
+                strcpy(words[j], words[j+1]);
+                strcpy(words[j+1], str);
+            }
+        }
+    }
+}
+
 void free_all() {
     free(words);
+    free(str);
     free(directory);
     free(save_directory);
     free(temporary_directory);
