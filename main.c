@@ -77,7 +77,7 @@ int main() {
 
     while ( !exit ) {
         wclear(panel_window(top));
-
+        // список файлов в директории
         if (update_dir != false) {
             DIR *dir;
             words = (char**) malloc(size*sizeof(char*));
