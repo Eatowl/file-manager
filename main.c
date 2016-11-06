@@ -77,7 +77,7 @@ int main() {
 
     while ( !exit ) {
         wclear(panel_window(top));
-        
+
         if (update_dir != false) {
             DIR *dir;
             words = (char**) malloc(size*sizeof(char*));
@@ -92,7 +92,7 @@ int main() {
                 words[i] = (char*) malloc(length + 1);
                 strcpy(words[i], entry->d_name);
                 wordCounter++;
-            }    
+            }
             sort_array(wordCounter);
             update_dir = false;
             closedir(dir);
@@ -155,7 +155,6 @@ int main() {
                     choice++;
                 break;
         }
-        //closedir(dir);
     }
     return 0;
 }
@@ -209,9 +208,9 @@ void sort_array(unsigned wordCounter) {
     str = (char*) malloc(SIZE_INCREMENT);
     for (int i = 1; i < wordCounter; ++i) {
         for (int j = 0; j < wordCounter - i; ++j) {
-            if (strlen(words[j]) > size_sort || strlen(words[j + 1]) > size_sort) {
+            if (strlen(words[j]) > size_sort 
+                || strlen(words[j + 1]) > size_sort) {
                 size_sort += strlen(words[j]);
-                size_sort += strlen(words[j+1]);
                 str = (char*) realloc(str, size_sort);
             }
             if (strcmp(words[j], words[j+1]) > 0) {
