@@ -221,7 +221,6 @@ void sort_array(unsigned wordCounter) {
             }
         }
     }
-    size_sort = 0;
 }
 
 void free_all() {
