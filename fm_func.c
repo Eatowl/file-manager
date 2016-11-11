@@ -47,7 +47,7 @@ void print_box_and_update(WINDOW **wins) {
 
 void init_wins(WINDOW **wins, int n, int row, int col) {
     int x = 0;
-    for(int i = 0; i < n; ++i) {
+    for (int i = 0; i < n; ++i) {
         wins[i] = newwin(row - 3, col / 2, 3, x);
         wbkgdset(wins[i], COLOR_PAIR(1));
         wclear(wins[i]);

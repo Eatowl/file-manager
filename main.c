@@ -10,7 +10,7 @@ char *directory,
      *save_directory,
      *temporary_directory;
 
-int main() {   
+int main() {
     WINDOW *my_wins[3];
     PANEL  *my_panels[3];
     PANEL  *top;
@@ -32,7 +32,7 @@ int main() {
         if (update_dir != false) {
             *ptr = 0;
             words = update_directory(words, directory, ptr);
-            update_dir = false; 
+            update_dir = false;
         }
         for (int i = 0; i < wordCounter; ++i) {
             if ( i == choice ) {
@@ -51,12 +51,12 @@ int main() {
         int ch = getch();
 
         switch ( ch ) {
-            case KEY_F(2): 
+            case KEY_F(2):
                 exit = true;
                 wclear(panel_window(top));
                 free_all(words, directory, save_directory, temporary_directory, wordCounter);
                 break;
-            case '\t': // переход на следующую панель
+            case '\t':  // переход на следующую панель
                 top = (PANEL *)panel_userptr(top);
                 top_panel(top);
                 strcpy(temporary_directory, save_directory);
@@ -70,17 +70,17 @@ int main() {
                 choice = 0;
                 break;
             case KEY_UP:
-                if ( choice != 0 ) 
-                    choice--; 
+                if ( choice != 0 )
+                    choice--;
                 break;
             case KEY_DOWN:
-                if ( choice != wordCounter - 1 ) 
+                if ( choice != wordCounter - 1 )
                     choice++;
                 break;
         }
     }
     // уничтожение созданных панелей и окон
-    for(int i = 0; i < 3; ++i) {
+    for (int i = 0; i < 3; ++i) {
         del_panel(my_panels[i]);
         delwin(my_wins[i]);
     }
