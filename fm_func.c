@@ -6,6 +6,7 @@
 #include "fm_func.h"
 
 #define SIZE_INCREMENT 10
+
 struct dirent *entry;
 
 char *malloc_array(char *array) {
@@ -92,7 +93,7 @@ void create_wins_and_panel(WINDOW **my_wins, PANEL **my_panels) {
         "Tab - next panel | F2 - exit | Enter - choise |");
 }
 
-char **update_directory(char **words, char *directory, int *ptr) {
+char **update_directory(char **words, char *directory, int *ptr, WINDOW **my_wins) {
     DIR *dir;
     unsigned length, counter_sort = 0, size = SIZE_INCREMENT;
     words = (char**) malloc(size*sizeof(char*));
@@ -107,8 +108,10 @@ char **update_directory(char **words, char *directory, int *ptr) {
         strcpy(words[i], entry->d_name);
         counter_sort++;
         (*ptr)++;
+        //wprintw(my_wins[1], "%d\n", entry->d_type);
     }
-    words = sort_array(words, counter_sort);
+    //words = sort_array(words, counter_sort);
+    //wprintw(my_wins[1], "%d\n", entry->d_type);
     closedir(dir);
     return words;
 }
@@ -121,8 +124,10 @@ char **sort_array(char **words, unsigned counter_sort) {
         for (int j = 0; j < counter_sort - i; ++j) {
             if (strlen(words[j]) > size_sort
                 || strlen(words[j + 1]) > size_sort) {
-                size_sort += strlen(words[j]);
-                size_sort += strlen(words[j+1]);
+                size_sort = strlen(words[j]) >= strlen(words[j + 1]) ?
+                                size_sort + strlen(words[j]) : size_sort + strlen(words[j + 1]);
+                //size_sort += strlen(words[j]);
+                //size_sort += strlen(words[j+1]);
                 str = (char*) realloc(str, size_sort);
             }
             if (strcmp(words[j], words[j+1]) > 0) {
