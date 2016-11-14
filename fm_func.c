@@ -5,36 +5,37 @@
 #include <stdlib.h>
 #include "fm_func.h"
 
-#define SIZE_INCREMENT 10
+#define SIZE_INCREMENT 50
 
 struct dirent *entry;
 
 char *malloc_array(char *array) {
-    array = (char*) malloc(SIZE_INCREMENT);
+    array = (char*) malloc(2);
     array = strcpy(array, "/");
     return array;
 }
-
-void realloc_all_array(unsigned length, char *directory, char *save_directory, char *temporary_directory) {
-    directory = (char*) realloc(directory, strlen(directory) + length);
-    save_directory = (char*) realloc(save_directory, strlen(directory) + length);
-    temporary_directory = (char*) realloc(temporary_directory, strlen(directory) + length);
+ 
+void realloc_all_array(unsigned length, char *directory, char *save_directory, char *temporary_directory, char *test) {
+    directory = (char*) realloc(directory, strlen(directory) + length + 1);
+    save_directory = (char*) realloc(save_directory, strlen(directory) + length + 1);
+    temporary_directory = (char*) realloc(temporary_directory, strlen(directory) + length + 1);
+    test = (char*) realloc(test, strlen(test) + length + 1);
 }
 
-bool move_between_directory(unsigned choice, char *directory, char *save_directory, char *temporary_directory, char **words) {
-    unsigned length;
-    if (strlen(directory) != 2) {
-        length = strlen(words[choice]) + 1;
-    } else {
-        length = strlen(words[choice]);
-    }
-    realloc_all_array(length, directory, save_directory, temporary_directory);
-    if (directory != NULL) {
+bool move_between_directory(unsigned choice, char *directory, char *save_directory, char *temporary_directory, char **words, char *test) {
+    //unsigned length;
+    //if (strlen(directory) != 1) {
+    //    length = strlen(words[choice]) + 1;
+    //} else {
+    //    length = strlen(words[choice]);
+    //}
+    //realloc_all_array(length, directory, save_directory, temporary_directory, test);
+    if (strlen(directory) != 1) {
         strcat(directory, "/");
         strcat(directory, words[choice]);
     } else {
-        free(directory);
-        return true;
+        strcat(directory, words[choice]);
+        //return true;
     }
     return false;
 }
@@ -93,29 +94,6 @@ void create_wins_and_panel(WINDOW **my_wins, PANEL **my_panels) {
         "Tab - next panel | F2 - exit | Enter - choise |");
 }
 
-char **update_directory(char **words, char *directory, int *ptr, WINDOW **my_wins) {
-    DIR *dir;
-    unsigned length, counter_sort = 0, size = SIZE_INCREMENT;
-    words = (char**) malloc(size*sizeof(char*));
-    dir = opendir(directory);
-    for (unsigned i = 0; (entry = readdir(dir)) != NULL; ++i) {
-        length = strlen(entry->d_name);
-        if (i >= size) {
-            size += SIZE_INCREMENT;
-            words = (char**) realloc(words, size*sizeof(char*));
-        }
-        words[i] = (char*) malloc(length + 1);
-        strcpy(words[i], entry->d_name);
-        counter_sort++;
-        (*ptr)++;
-        //wprintw(my_wins[1], "%d\n", entry->d_type);
-    }
-    //words = sort_array(words, counter_sort);
-    //wprintw(my_wins[1], "%d\n", entry->d_type);
-    closedir(dir);
-    return words;
-}
-
 char **sort_array(char **words, unsigned counter_sort) {
     unsigned size_sort = SIZE_INCREMENT;
     char *str;
@@ -126,8 +104,6 @@ char **sort_array(char **words, unsigned counter_sort) {
                 || strlen(words[j + 1]) > size_sort) {
                 size_sort = strlen(words[j]) >= strlen(words[j + 1]) ?
                                 size_sort + strlen(words[j]) : size_sort + strlen(words[j + 1]);
-                //size_sort += strlen(words[j]);
-                //size_sort += strlen(words[j+1]);
                 str = (char*) realloc(str, size_sort);
             }
             if (strcmp(words[j], words[j+1]) > 0) {

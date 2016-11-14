@@ -2,8 +2,8 @@
 #define FM_FUNC_H
 
 char *malloc_array(char *array);
-void realloc_all_array(unsigned length, char *directory, char *save_directory, char *temporary_directory);
-bool move_between_directory(unsigned choice, char *directory, char *save_directory, char *temporary_directory, char **words);
+void realloc_all_array(unsigned length, char *directory, char *save_directory, char *temporary_directory, char *test);
+bool move_between_directory(unsigned choice, char *directory, char *save_directory, char *temporary_directory, char **words, char *test);
 void print_box_and_update(WINDOW **wins);
 void init_wins(WINDOW **wins, int n, int row, int col);
 void create_wins_and_panel(WINDOW **my_wins, PANEL **my_panels);
