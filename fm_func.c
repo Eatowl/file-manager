@@ -15,21 +15,20 @@ char *malloc_array(char *array) {
     return array;
 }
  
-void realloc_all_array(unsigned length, char *directory, char *save_directory, char *temporary_directory, char *test) {
+void realloc_all_array(unsigned length, char *directory, char *save_directory, char *temporary_directory) {
     directory = (char*) realloc(directory, strlen(directory) + length + 1);
     save_directory = (char*) realloc(save_directory, strlen(directory) + length + 1);
     temporary_directory = (char*) realloc(temporary_directory, strlen(directory) + length + 1);
-    test = (char*) realloc(test, strlen(test) + length + 1);
 }
 
 bool move_between_directory(unsigned choice, char *directory, char *save_directory, char *temporary_directory, char **words, char *test) {
-    //unsigned length;
-    //if (strlen(directory) != 1) {
-    //    length = strlen(words[choice]) + 1;
-    //} else {
-    //    length = strlen(words[choice]);
-    //}
-    //realloc_all_array(length, directory, save_directory, temporary_directory, test);
+    unsigned length;
+    if (strlen(directory) != 1) {
+        length = strlen(words[choice]) + 1;
+    } else {
+        length = strlen(words[choice]);
+    }
+    realloc_all_array(length, directory, save_directory, temporary_directory);
     if (strlen(directory) != 1) {
         strcat(directory, "/");
         strcat(directory, words[choice]);

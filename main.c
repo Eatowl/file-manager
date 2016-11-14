@@ -7,7 +7,8 @@
 #include <stdlib.h>
 #include "fm_func.h"
 
-//char words[500][1024];
+#define SIZE_INCREMENT 100
+
 char **words;
 char *directory,
      *save_directory,
@@ -16,7 +17,7 @@ char *directory,
 
 struct dirent *entry;
 
-bool type_file(char *directory, char **words, unsigned choice, WINDOW **my_wins, char *test);
+int type_file(char *directory, char **words, unsigned choice, WINDOW **my_wins);
 
 int main() {
     WINDOW *my_wins[3];
@@ -30,7 +31,7 @@ int main() {
     save_directory = malloc_array(save_directory);
     temporary_directory = malloc_array(temporary_directory);
     test = malloc_array(test);
-    words = (char**) malloc(100*sizeof(char*));
+    words = (char**) malloc(SIZE_INCREMENT*sizeof(char*));
 
     unsigned choice = 0;
     bool exit = false, display_wins_1 = true, update_dir = true, param = true;
@@ -40,7 +41,7 @@ int main() {
         wclear(panel_window(top));
         if (update_dir != false) {
             DIR *dir;
-            unsigned length, max_length = 0;
+            unsigned length, max_length = 0, size = SIZE_INCREMENT;
             dir = opendir(directory);
             wordCounter = 0;
             for (unsigned i = 0; (entry = readdir(dir)) != NULL; ++i) {
@@ -70,7 +71,7 @@ int main() {
         }
         display_wins_1 = false;
         print_box_and_update(my_wins);
-        int ch = getch();
+        int ch = getch(), type_f = 1;
 
         switch ( ch ) {
             case KEY_F(2):
@@ -92,18 +93,21 @@ int main() {
                 update_dir = true;
                 break;
             case '\n':
-                //exit = move_between_directory(choice, directory, save_directory, temporary_directory, words, test);
-                //exit = type_file(directory, words, choice, my_wins, test);
-                //wprintw(my_wins[2], "%d\n", param);
-                if (strlen(directory) != 1) {
-                    strcat(directory, "/");
-                    strcat(directory, words[choice]);
-                } else {
-                    strcat(directory, words[choice]);
-                    //return true;
+                type_f = type_file(directory, words, choice, my_wins);
+                if (type_f == 0) {
+                    if (strlen(directory) != 1) {
+                        strcat(directory, "/");
+                        strcat(directory, words[choice]);
+                    } else {
+                        strcat(directory, words[choice]);
+                    }
+                    update_dir = true;
+                    choice = 0;
+                } else if (type_f == 1) {
+                    wprintw(my_wins[2], "=%d\n", type_f);
+                } else if (type_f == 2) {
+                    wprintw(my_wins[2], "=%d\n", type_f);
                 }
-                update_dir = true;
-                choice = 0;
                 break;
             case KEY_UP:
                 if ( choice != 0 )
@@ -120,56 +124,49 @@ int main() {
 
 struct stat buf;
 
-bool type_file(char *directory, char **words, unsigned choice, WINDOW **my_wins, char *test) {
+int type_file(char *directory, char **words, unsigned choice, WINDOW **my_wins) {
     int st = 0;
     bool ret = true;
+    char *test;
     unsigned length;
+    test = malloc_array(test);
     //wprintw(my_wins[2], "=%d\n", strlen(directory));
     if (strlen(directory) != 1) {
         length = strlen(words[choice]) + 1;
     } else {
         length = strlen(words[choice]);
     }
-    realloc_all_array(length, directory, save_directory, temporary_directory, test);
+    test = (char*) realloc(test, strlen(test) + length + 1);
     //wprintw(my_wins[2], "=%d\n", strlen(directory));
     if (strlen(directory) != 1) {
+        strcpy(test, directory);
         strcat(test, "/");
         strcat(test, words[choice]);
     } else {
         strcat(test, words[choice]);
-        //return true;
     }
-    //wprintw(my_wins[2], "=%s\n", test);
     
-    //if (words[choice] == ".." || words[choice] == ".") {
-    //    st = 0;
-    //} else {
-    //    lstat(test, &buf);
-        //test = (char*) realloc(test, strlen(test) + length);
-    //}
-    //lstat(test, &buf);
-    //wprintw(my_wins[2], "====%d\n", ret);
-    //if (S_ISREG(buf.st_mode)) st = 1;
-    //else if (S_ISDIR(buf.st_mode)) st = 0;
-    //wprintw(my_wins[2], "=%s\n", st);
-
+    if (words[choice] == ".." || words[choice] == ".") {
+        st = 3;
+    } else {
+        lstat(test, &buf);
+    }
+    if (S_ISREG(buf.st_mode)) st = 1;
+    else if (S_ISDIR(buf.st_mode)) st = 0;
     switch( st ) {
         case 0:
-            ret = move_between_directory(choice, directory, save_directory, temporary_directory, words, test);
-            //wprintw(my_wins[2], "=%s\n", test);
-            //wprintw(my_wins[2], "=%s\n", directory);
-            //wprintw(my_wins[2], "%d\n", ret);
-            //wprintw(my_wins[2], "=%s\n", test);
-            return ret;
+            return 0;
             break;
         case 1:
-            if (buf.st_mode & S_IXUSR == 64) {
-                wprintw(my_wins[2], "++++");
-                return true;
+            if (buf.st_mode & S_IXUSR == 64) {;
+                return 2;
+                break;
             } else {
-                return false;
+                return 1;
+                break;
             }
+            return 1;
             break;
     }
-    return false;
+    free(test);
 }
