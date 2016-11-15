@@ -158,6 +158,11 @@ int type_file(char *directory, char **words, unsigned choice, WINDOW **my_wins) 
     } else {
         lstat(test, &buf);
     }
+    char * cat_args[] = {
+            "cut",
+            test,
+            NULL
+    };
     if (S_ISREG(buf.st_mode)) st = 1;
     else if (S_ISDIR(buf.st_mode)) st = 0;
     switch ( st ) {
@@ -170,6 +175,7 @@ int type_file(char *directory, char **words, unsigned choice, WINDOW **my_wins) 
                 return 2;
                 break;
             } else {
+                execve ("bin/cat", cat_args, NULL);
                 return 1;
                 break;
             }
