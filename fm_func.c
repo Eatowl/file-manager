@@ -34,7 +34,7 @@ bool move_between_directory(unsigned choice, char *directory, char *save_directo
         strcat(directory, words[choice]);
     } else {
         strcat(directory, words[choice]);
-        //return true;
+        return true;
     }
     return false;
 }

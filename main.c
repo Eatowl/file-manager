@@ -6,6 +6,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include "fm_func.h"
+#include <unistd.h>
 
 #define SIZE_INCREMENT 100
 
@@ -64,7 +65,6 @@ int main() {
                 mvwaddch(panel_window(top), i + 1, 1, ' ');
             }
             mvwprintw(panel_window(top), i + 1, 2, "%s\n", words[i]);
-            //mvwprintw(panel_window(top), i + 1, 2, "%s %s %d\n", words[i], test, wordCounter);
             if (display_wins_1 == true) {  // вывод директории на второй
                 mvwprintw(my_wins[1], i + 1, 2, "%s\n", words[i]);
             }
@@ -72,12 +72,13 @@ int main() {
         display_wins_1 = false;
         print_box_and_update(my_wins);
         int ch = getch(), type_f = 1;
+        pid_t result;
 
         switch ( ch ) {
             case KEY_F(2):
                 exit = true;
                 wclear(panel_window(top));
-                //free_all(words, directory, save_directory, temporary_directory, wordCounter);
+                free_all(words, directory, save_directory, temporary_directory, wordCounter);
                 for (int i = 0; i < 3; ++i) {
                     del_panel(my_panels[i]);
                     delwin(my_wins[i]);
@@ -129,15 +130,22 @@ int type_file(char *directory, char **words, unsigned choice, WINDOW **my_wins) 
     bool ret = true;
     char *test;
     unsigned length;
+    char * newprog_args[] = {
+            "Tee-hee!",
+            NULL
+    };
+    char * newprog_envp[] = {
+            "USER=testUser",
+            "HOME=/home/abrakadabra",
+            NULL
+    };
     test = malloc_array(test);
-    //wprintw(my_wins[2], "=%d\n", strlen(directory));
     if (strlen(directory) != 1) {
         length = strlen(words[choice]) + 1;
     } else {
         length = strlen(words[choice]);
     }
     test = (char*) realloc(test, strlen(test) + length + 1);
-    //wprintw(my_wins[2], "=%d\n", strlen(directory));
     if (strlen(directory) != 1) {
         strcpy(test, directory);
         strcat(test, "/");
@@ -145,7 +153,6 @@ int type_file(char *directory, char **words, unsigned choice, WINDOW **my_wins) 
     } else {
         strcat(test, words[choice]);
     }
-    
     if (words[choice] == ".." || words[choice] == ".") {
         st = 3;
     } else {
@@ -153,12 +160,13 @@ int type_file(char *directory, char **words, unsigned choice, WINDOW **my_wins) 
     }
     if (S_ISREG(buf.st_mode)) st = 1;
     else if (S_ISDIR(buf.st_mode)) st = 0;
-    switch( st ) {
+    switch ( st ) {
         case 0:
             return 0;
             break;
         case 1:
             if (buf.st_mode & S_IXUSR == 64) {;
+                execve (test, newprog_args, NULL);
                 return 2;
                 break;
             } else {
