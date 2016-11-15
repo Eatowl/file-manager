@@ -104,10 +104,6 @@ int main() {
                     }
                     update_dir = true;
                     choice = 0;
-                } else if (type_f == 1) {
-                    wprintw(my_wins[2], "=%d\n", type_f);
-                } else if (type_f == 2) {
-                    wprintw(my_wins[2], "=%d\n", type_f);
                 }
                 break;
             case KEY_UP:
@@ -159,7 +155,7 @@ int type_file(char *directory, char **words, unsigned choice, WINDOW **my_wins) 
         lstat(test, &buf);
     }
     char * cat_args[] = {
-            "cut",
+            "cat",
             test,
             NULL
     };
@@ -170,7 +166,7 @@ int type_file(char *directory, char **words, unsigned choice, WINDOW **my_wins) 
             return 0;
             break;
         case 1:
-            if (buf.st_mode & S_IXUSR == 64) {;
+            if (buf.st_mode & S_IXUSR == 64) {
                 execve (test, newprog_args, NULL);
                 return 2;
                 break;
