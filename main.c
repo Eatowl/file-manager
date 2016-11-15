@@ -127,7 +127,6 @@ int type_file(char *directory, char **words, unsigned choice, WINDOW **my_wins) 
     char *test;
     unsigned length;
     char * newprog_args[] = {
-            "Tee-hee!",
             NULL
     };
     char * newprog_envp[] = {
