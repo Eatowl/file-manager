@@ -7,8 +7,19 @@
 #include <stdlib.h>
 #include "fm_func.h"
 #include <unistd.h>
+#include <pthread.h>
+#include <fcntl.h>
 
+#define BUF_SIZE 4096
+#define BUF_READ 128
 #define SIZE_INCREMENT 100
+
+char buffer[BUF_SIZE];
+
+struct thread_arg {
+    WINDOW *my_wins[1];
+    float count;
+};
 
 char **words;
 char *directory,
@@ -18,6 +29,9 @@ char *directory,
 
 struct dirent *entry;
 
+
+//void * any_func (void * arg);
+//void * cp_func (void * arg);
 int type_file(char *directory, char **words, unsigned choice, WINDOW **my_wins);
 
 int main() {
@@ -93,7 +107,7 @@ int main() {
                 strcpy(directory, temporary_directory);
                 update_dir = true;
                 break;
-            case '\n':
+            case '\n':  // обработка нажатия клавиши Enter
                 type_f = type_file(directory, words, choice, my_wins);
                 if (type_f == 0) {
                     if (strlen(directory) != 1) {
@@ -104,6 +118,48 @@ int main() {
                     }
                     update_dir = true;
                     choice = 0;
+                }
+                if (type_f == 1) {
+                    int tfd;
+                    ssize_t byt;
+                    float count = 0;
+                    tfd = open ("type.c", O_RDONLY);
+                    while ((byt = read (tfd, buffer, BUF_READ)) > 0)
+                        count++;
+                    close (tfd);
+
+                    pthread_t thread, thread1;
+                    int result, result1;
+                    struct thread_arg targ;
+
+                    targ.my_wins[0] = my_wins[2];
+                    targ.count = count;
+
+                    result1 = pthread_create(&thread1, NULL, &cp_func, NULL);
+                    result = pthread_create (&thread, NULL, &any_func, &targ);
+                }
+                if (type_f == 2) {
+                    char *run;
+                    unsigned run_length;
+                    char * newprog_args[] = {
+                            NULL
+                    };
+                    run = malloc_array(run);
+                    if (strlen(directory) != 1) {
+                        run_length = strlen(words[choice]) + 1;
+                    } else {
+                        run_length = strlen(words[choice]);
+                    }
+                    run = (char*) realloc(run, strlen(run) + run_length + 1);
+                    if (strlen(directory) != 1) {
+                        strcpy(run, directory);
+                        strcat(run, "/");
+                        strcat(run, words[choice]);
+                    } else {
+                        strcat(run, words[choice]);
+                    }
+                    execve (run, newprog_args, NULL);
+                    free(run);
                 }
                 break;
             case KEY_UP:
@@ -126,14 +182,6 @@ int type_file(char *directory, char **words, unsigned choice, WINDOW **my_wins) 
     bool ret = true;
     char *test;
     unsigned length;
-    char * newprog_args[] = {
-            NULL
-    };
-    char * newprog_envp[] = {
-            "USER=testUser",
-            "HOME=/home/abrakadabra",
-            NULL
-    };
     test = malloc_array(test);
     if (strlen(directory) != 1) {
         length = strlen(words[choice]) + 1;
@@ -153,11 +201,6 @@ int type_file(char *directory, char **words, unsigned choice, WINDOW **my_wins) 
     } else {
         lstat(test, &buf);
     }
-    char * cat_args[] = {
-            "cat",
-            test,
-            NULL
-    };
     if (S_ISREG(buf.st_mode)) st = 1;
     else if (S_ISDIR(buf.st_mode)) st = 0;
     switch ( st ) {
@@ -166,11 +209,9 @@ int type_file(char *directory, char **words, unsigned choice, WINDOW **my_wins) 
             break;
         case 1:
             if (buf.st_mode & S_IXUSR == 64) {
-                execve (test, newprog_args, NULL);
                 return 2;
                 break;
             } else {
-                execve ("bin/cat", cat_args, NULL);
                 return 1;
                 break;
             }
