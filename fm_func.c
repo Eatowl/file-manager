@@ -4,10 +4,62 @@
 #include <string.h>
 #include <stdlib.h>
 #include "fm_func.h"
+#include <sys/types.h>
+#include <pthread.h>
+#include <fcntl.h>
 
 #define SIZE_INCREMENT 50
+#define BUF_SIZE 4096
+#define BUF_READ 128
+
+char buffer[BUF_SIZE];
+
+struct thread_arg {
+    WINDOW *my_wins[1];
+    float count;
+};
 
 struct dirent *entry;
+
+void * any_func (void * arg) {
+    struct thread_arg targ = *(struct thread_arg *) arg;
+    float countOut = 0;
+    ssize_t bytes;
+    int rez = 0, yfd;
+    yfd = open ("type.c", O_RDONLY);
+    while ((bytes = read (yfd, buffer, BUF_READ)) > 0) {
+        wclear(targ.my_wins[0]);
+        rez += BUF_READ;
+        countOut = rez / (targ.count * BUF_READ / 100);
+        mvwprintw(targ.my_wins[0], 1, 1,
+            "procent-------| %f\n", countOut);
+        update_panels();
+        doupdate();
+        sleep(1);
+    }
+    close(yfd);
+    return NULL;
+}
+
+void * cp_func (void * arg) {
+
+    int ifd, ofd, tfd;
+    float count = 0, countOut = 0;
+    ssize_t bytes;
+    ssize_t byt;
+
+    ifd = open ("type.c", O_RDONLY);
+    ofd = open ("testcp-c", O_WRONLY | O_CREAT | O_TRUNC, 0640);
+
+    while ((bytes = read (ifd, buffer, BUF_READ)) > 0) {
+        write (ofd, buffer, bytes);
+    }
+
+    close (ifd);
+    close (ofd);
+
+    return NULL;
+}
 
 char *malloc_array(char *array) {
     array = (char*) malloc(2);
