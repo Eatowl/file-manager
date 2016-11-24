@@ -1,6 +1,8 @@
 #ifndef FM_FUNC_H
 #define FM_FUNC_H
 
+void * any_func (void * arg);
+void * cp_func (void * arg);
 char *malloc_array(char *array);
 void realloc_all_array(unsigned length, char *directory, char *save_directory, char *temporary_directory);
 bool move_between_directory(unsigned choice, char *directory, char *save_directory, char *temporary_directory, char **words, char *test);
