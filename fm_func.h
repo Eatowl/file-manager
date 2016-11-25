@@ -1,7 +1,7 @@
 #ifndef FM_FUNC_H
 #define FM_FUNC_H
 
-void * any_func (void * arg);
+void * percent_func (void * arg);
 void * cp_func (void * arg);
 char *malloc_array(char *array);
 void realloc_all_array(unsigned length, char *directory, char *save_directory, char *temporary_directory);

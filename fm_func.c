@@ -17,6 +17,12 @@ char buffer[BUF_SIZE];
 struct thread_arg {
     WINDOW *my_wins[1];
     float count;
+    char cp_file[BUF_SIZE];
+};
+
+struct thread_arg_paste {
+    char cp_file_p[BUF_SIZE];
+    char paste_direct[BUF_SIZE];
 };
 
 struct dirent *entry;
@@ -26,12 +32,14 @@ void * any_func (void * arg) {
     float countOut = 0;
     ssize_t bytes;
     int rez = 0, yfd;
-    yfd = open ("type.c", O_RDONLY);
+    mvwprintw(targ.my_wins[0], 0, 1,
+            "procent-------| %s\n", targ.cp_file);
+    yfd = open (targ.cp_file, O_RDONLY);
     while ((bytes = read (yfd, buffer, BUF_READ)) > 0) {
         wclear(targ.my_wins[0]);
         rez += BUF_READ;
         countOut = rez / (targ.count * BUF_READ / 100);
-        mvwprintw(targ.my_wins[0], 1, 1,
+        mvwprintw(targ.my_wins[0], 0, 1,
             "procent-------| %f\n", countOut);
         update_panels();
         doupdate();
@@ -42,14 +50,14 @@ void * any_func (void * arg) {
 }
 
 void * cp_func (void * arg) {
-
+    struct thread_arg_paste cp_arg = *(struct thread_arg_paste *) arg;
     int ifd, ofd, tfd;
     float count = 0, countOut = 0;
     ssize_t bytes;
     ssize_t byt;
 
-    ifd = open ("type.c", O_RDONLY);
-    ofd = open ("testcp-c", O_WRONLY | O_CREAT | O_TRUNC, 0640);
+    ifd = open (cp_arg.cp_file_p, O_RDONLY);
+    ofd = open (cp_arg.paste_direct, O_WRONLY | O_CREAT | O_TRUNC, 0640);
 
     while ((bytes = read (ifd, buffer, BUF_READ)) > 0) {
         write (ofd, buffer, bytes);
@@ -134,15 +142,19 @@ void create_wins_and_panel(WINDOW **my_wins, PANEL **my_panels) {
     wbkgdset(my_wins[2], COLOR_PAIR(1));
     wclear(my_wins[2]);
 
+    my_wins[3] = newwin(1, col, 1, col - (col - 110));
+    wbkgdset(my_wins[3], COLOR_PAIR(1));
+    wclear(my_wins[3]);
+
     print_box_and_update(my_wins);
     // создание панелей, на основе окон
-    for (int i = 0; i < 3; ++i)
+    for (int i = 0; i < 4; ++i)
         my_panels[i] = new_panel(my_wins[i]);
     set_panel_userptr(my_panels[0], my_panels[1]);
     set_panel_userptr(my_panels[1], my_panels[0]);
 
     mvwprintw(my_wins[2], 1, 1,
-        "Tab - next panel | F2 - exit | Enter - choise |");
+        "Tab - next panel | F2 - exit | Enter - choise | C - Copy | P - Paste");
 }
 
 char **sort_array(char **words, unsigned counter_sort) {
