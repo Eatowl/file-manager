@@ -32,6 +32,7 @@ void * percent_func (void * arg) {
     float countOut = 0;
     ssize_t bytes;
     int rez = 0, yfd;
+
     yfd = open (targ.cp_file, O_RDONLY);
     while ((bytes = read (yfd, buffer, BUF_READ)) > 0) {
         wclear(targ.my_wins[0]);
@@ -56,14 +57,11 @@ void * cp_func (void * arg) {
 
     ifd = open (cp_arg.cp_file_p, O_RDONLY);
     ofd = open (cp_arg.paste_direct, O_WRONLY | O_CREAT | O_TRUNC, 0640);
-
     while ((bytes = read (ifd, buffer, BUF_READ)) > 0) {
         write (ofd, buffer, bytes);
     }
-
     close (ifd);
     close (ofd);
-
     return NULL;
 }
 
