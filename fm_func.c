@@ -27,20 +27,18 @@ struct thread_arg_paste {
 
 struct dirent *entry;
 
-void * any_func (void * arg) {
+void * percent_func (void * arg) {
     struct thread_arg targ = *(struct thread_arg *) arg;
     float countOut = 0;
     ssize_t bytes;
     int rez = 0, yfd;
-    mvwprintw(targ.my_wins[0], 0, 1,
-            "procent-------| %s\n", targ.cp_file);
     yfd = open (targ.cp_file, O_RDONLY);
     while ((bytes = read (yfd, buffer, BUF_READ)) > 0) {
         wclear(targ.my_wins[0]);
         rez += BUF_READ;
         countOut = rez / (targ.count * BUF_READ / 100);
         mvwprintw(targ.my_wins[0], 0, 1,
-            "procent-------| %f\n", countOut);
+            "percent - %f\n", countOut);
         update_panels();
         doupdate();
         sleep(1);
