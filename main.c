@@ -39,9 +39,6 @@ char *dir_array;
 
 struct dirent *entry;
 
-
-//void * any_func (void * arg);
-//void * cp_func (void * arg);
 int type_file(char *directory, char **words, unsigned choice, WINDOW **my_wins);
 
 int main() {
