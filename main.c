@@ -1,5 +1,6 @@
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/wait.h>
 #include <ncurses.h>
 #include <dirent.h>
 #include <panel.h>
@@ -36,6 +37,8 @@ char *directory,
      *copy_dir,
      *name_copy_file;
 char *dir_array;
+char *in_run,
+     *out_run;
 
 struct dirent *entry;
 
@@ -208,6 +211,74 @@ int main() {
                     result1 = pthread_create(&thread1, NULL, &cp_func, &cp_arg);
                 }
                 update_dir = true;
+                break;
+            case 105: // Нажатие клавиши "I" - выбор исполняемой программы для получения входных данных.
+                type_f = type_file(directory, words, choice, my_wins);
+                if (type_f == 2) {
+                    unsigned in_run_length;
+                    in_run = malloc_array(in_run);
+                    if (strlen(directory) != 1) {
+                        in_run_length = strlen(words[choice]) + 1;
+                    } else {
+                        in_run_length = strlen(words[choice]);
+                    }
+                    in_run = (char*) realloc(in_run, strlen(in_run) + in_run_length + 1);
+                    if (strlen(directory) != 1) {
+                        strcpy(in_run, directory);
+                        strcat(in_run, "/");
+                        strcat(in_run, words[choice]);
+                    } else {
+                        strcat(in_run, words[choice]);
+                    }
+                }
+                break;
+            case 111: // Нажатие клавиши "O" - выбор исполняемой программы для запуска.
+                type_f = type_file(directory, words, choice, my_wins);
+                if (type_f == 2) {
+                    unsigned out_run_length;
+                    out_run = malloc_array(out_run);
+                    if (strlen(directory) != 1) {
+                        out_run_length = strlen(words[choice]) + 1;
+                    } else {
+                        out_run_length = strlen(words[choice]);
+                    }
+                    out_run = (char*) realloc(out_run, strlen(out_run) + out_run_length + 1);
+                    if (strlen(directory) != 1) {
+                        strcpy(out_run, directory);
+                        strcat(out_run, "/");
+                        strcat(out_run, words[choice]);
+                    } else {
+                        strcat(out_run, words[choice]);
+                    }
+                }
+                int pf[2], pid1, pid2;
+                char spf [2][32];
+
+                if (pipe (pf) == -1) {
+                    fprintf (stderr, "pipe() error\n");
+                    return 1;
+                }
+                sprintf (spf[0], "%d", pf[0]);
+                sprintf (spf[1], "%d", pf[1]);
+
+                if ((pid1 = fork ()) == 0) {
+                    dup2 (pf[1], 1);
+                    close (pf[0]);
+                    execlp (in_run, "in", spf[1], NULL);
+                    fprintf (stderr, "exec() [1] error\n");
+                    return 1;
+                }
+                if ((pid1 = fork ()) == 0) {
+                    dup2 (pf[0], 0);
+                    close (pf[1]);
+                    execlp (out_run, "out", spf[0], NULL);
+                    fprintf (stderr, "exec() [2] error\n");
+                    return 1;
+                }
+                close (pf[1]);
+                waitpid (pid1, NULL, 0);
+                close (pf[0]);
+                waitpid (pid2, NULL, 0);
                 break;
             case KEY_UP:
                 if ( choice != 0 )
