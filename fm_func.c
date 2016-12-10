@@ -27,6 +27,30 @@ struct thread_arg_paste {
 
 struct dirent *entry;
 
+char *test_return(char *input_direct, char *directory, char **words, unsigned choice) {
+    unsigned length;
+    input_direct = malloc_array(input_direct);
+    if (strlen(directory) != 1) {
+        length = strlen(words[choice]) + 1;
+    } else {
+        length = strlen(words[choice]);
+    }
+    input_direct = (char*) realloc(input_direct, strlen(input_direct) + length + 1);
+    if (strlen(directory) != 1) {
+        input_direct = add_file_or_direct(input_direct, directory, words, choice);
+    } else {
+        strcat(input_direct, words[choice]);
+    }
+    return input_direct;
+}
+
+char *add_file_or_direct(char *new_way, char *directory, char **words, unsigned choice) {
+    strcpy(new_way, directory);
+    strcat(new_way, "/");
+    strcat(new_way, words[choice]);
+    return new_way;
+}
+
 void * percent_func (void * arg) {
     struct thread_arg targ = *(struct thread_arg *) arg;
     float countOut = 0;

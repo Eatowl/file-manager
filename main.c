@@ -42,6 +42,8 @@ char *in_run,
 
 struct dirent *entry;
 
+//char *add_file_or_direct(char *new_way, char *directory, char **words, unsigned choice);
+//char *test_return(char *input_direct, char *directory, char **words, unsigned choice);
 int type_file(char *directory, char **words, unsigned choice, WINDOW **my_wins);
 
 int main() {
@@ -135,24 +137,10 @@ int main() {
                 }
                 if (type_f == 2) {
                     char *run;
-                    unsigned run_length;
                     char * newprog_args[] = {
                             NULL
                     };
-                    run = malloc_array(run);
-                    if (strlen(directory) != 1) {
-                        run_length = strlen(words[choice]) + 1;
-                    } else {
-                        run_length = strlen(words[choice]);
-                    }
-                    run = (char*) realloc(run, strlen(run) + run_length + 1);
-                    if (strlen(directory) != 1) {
-                        strcpy(run, directory);
-                        strcat(run, "/");
-                        strcat(run, words[choice]);
-                    } else {
-                        strcat(run, words[choice]);
-                    }
+                    run = test_return(run, directory, words, choice);
                     execve (run, newprog_args, NULL);
                     free(run);
                 }
@@ -169,15 +157,12 @@ int main() {
                     close (tfd);
 
                     strcpy(copy_dir, directory);
-                    strcpy(copy_file, directory);
-                    strcat(copy_file, "/");
-                    strcat(copy_file, words[choice]);
+                    copy_file = add_file_or_direct(copy_file, directory, words, choice);
                     strcpy(name_copy_file, words[choice]);
 
                     pthread_t thread;
                     int result;
                     struct thread_arg targ;
-
                     targ.my_wins[0] = my_wins[3];
                     targ.count = count;
                     strcpy(targ.cp_file, copy_file);
@@ -214,46 +199,15 @@ int main() {
                 break;
             case 105: // Нажатие клавиши "I" - выбор исполняемой программы для получения входных данных.
                 type_f = type_file(directory, words, choice, my_wins);
-                if (type_f == 2) {
-                    unsigned in_run_length;
-                    in_run = malloc_array(in_run);
-                    if (strlen(directory) != 1) {
-                        in_run_length = strlen(words[choice]) + 1;
-                    } else {
-                        in_run_length = strlen(words[choice]);
-                    }
-                    in_run = (char*) realloc(in_run, strlen(in_run) + in_run_length + 1);
-                    if (strlen(directory) != 1) {
-                        strcpy(in_run, directory);
-                        strcat(in_run, "/");
-                        strcat(in_run, words[choice]);
-                    } else {
-                        strcat(in_run, words[choice]);
-                    }
-                }
+                if (type_f == 2)
+                    in_run = test_return(in_run, directory, words, choice);
                 break;
             case 111: // Нажатие клавиши "O" - выбор исполняемой программы для запуска.
                 type_f = type_file(directory, words, choice, my_wins);
-                if (type_f == 2) {
-                    unsigned out_run_length;
-                    out_run = malloc_array(out_run);
-                    if (strlen(directory) != 1) {
-                        out_run_length = strlen(words[choice]) + 1;
-                    } else {
-                        out_run_length = strlen(words[choice]);
-                    }
-                    out_run = (char*) realloc(out_run, strlen(out_run) + out_run_length + 1);
-                    if (strlen(directory) != 1) {
-                        strcpy(out_run, directory);
-                        strcat(out_run, "/");
-                        strcat(out_run, words[choice]);
-                    } else {
-                        strcat(out_run, words[choice]);
-                    }
-                }
+                if (type_f == 2)
+                    out_run = test_return(out_run, directory, words, choice);
                 int pf[2], pid1, pid2;
                 char spf [2][32];
-
                 if (pipe (pf) == -1) {
                     fprintf (stderr, "pipe() error\n");
                     return 1;
@@ -299,21 +253,7 @@ int type_file(char *directory, char **words, unsigned choice, WINDOW **my_wins) 
     int st = 0;
     bool ret = true;
     char *test;
-    unsigned length;
-    test = malloc_array(test);
-    if (strlen(directory) != 1) {
-        length = strlen(words[choice]) + 1;
-    } else {
-        length = strlen(words[choice]);
-    }
-    test = (char*) realloc(test, strlen(test) + length + 1);
-    if (strlen(directory) != 1) {
-        strcpy(test, directory);
-        strcat(test, "/");
-        strcat(test, words[choice]);
-    } else {
-        strcat(test, words[choice]);
-    }
+    test = test_return(test, directory, words, choice);
     if (words[choice] == ".." || words[choice] == ".") {
         st = 3;
     } else {

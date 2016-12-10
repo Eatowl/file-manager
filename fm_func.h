@@ -1,6 +1,9 @@
 #ifndef FM_FUNC_H
 #define FM_FUNC_H
 
+char *add_file_or_direct(char *new_way, char *directory, char **words, unsigned choice);
+char *test_return(char *input_direct, char *directory, char **words, unsigned choice);
+
 void * percent_func (void * arg);
 void * cp_func (void * arg);
 char *malloc_array(char *array);
