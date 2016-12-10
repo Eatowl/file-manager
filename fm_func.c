@@ -1,10 +1,13 @@
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <sys/wait.h>
 #include <ncurses.h>
 #include <dirent.h>
 #include <panel.h>
 #include <string.h>
 #include <stdlib.h>
 #include "fm_func.h"
-#include <sys/types.h>
+#include <unistd.h>
 #include <pthread.h>
 #include <fcntl.h>
 
@@ -26,6 +29,37 @@ struct thread_arg_paste {
 };
 
 struct dirent *entry;
+struct stat buf;
+
+int type_file(char *directory, char **words, unsigned choice, WINDOW **my_wins) {
+    int st = 0;
+    bool ret = true;
+    char *test;
+    test = test_return(test, directory, words, choice);
+    if (words[choice] == ".." || words[choice] == ".") {
+        st = 3;
+    } else {
+        lstat(test, &buf);
+    }
+    if (S_ISREG(buf.st_mode)) st = 1;
+    else if (S_ISDIR(buf.st_mode)) st = 0;
+    switch ( st ) {
+        case 0:
+            return 0;
+            break;
+        case 1:
+            if (buf.st_mode & S_IXUSR == 64) {
+                return 2;
+                break;
+            } else {
+                return 1;
+                break;
+            }
+            return 1;
+            break;
+    }
+    free(test);
+}
 
 char *test_return(char *input_direct, char *directory, char **words, unsigned choice) {
     unsigned length;

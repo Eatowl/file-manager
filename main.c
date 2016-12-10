@@ -42,9 +42,7 @@ char *in_run,
 
 struct dirent *entry;
 
-//char *add_file_or_direct(char *new_way, char *directory, char **words, unsigned choice);
-//char *test_return(char *input_direct, char *directory, char **words, unsigned choice);
-int type_file(char *directory, char **words, unsigned choice, WINDOW **my_wins);
+//int type_file(char *directory, char **words, unsigned choice, WINDOW **my_wins);
 
 int main() {
     WINDOW *my_wins[4];
@@ -245,36 +243,4 @@ int main() {
         }
     }
     return 0;
-}
-
-struct stat buf;
-
-int type_file(char *directory, char **words, unsigned choice, WINDOW **my_wins) {
-    int st = 0;
-    bool ret = true;
-    char *test;
-    test = test_return(test, directory, words, choice);
-    if (words[choice] == ".." || words[choice] == ".") {
-        st = 3;
-    } else {
-        lstat(test, &buf);
-    }
-    if (S_ISREG(buf.st_mode)) st = 1;
-    else if (S_ISDIR(buf.st_mode)) st = 0;
-    switch ( st ) {
-        case 0:
-            return 0;
-            break;
-        case 1:
-            if (buf.st_mode & S_IXUSR == 64) {
-                return 2;
-                break;
-            } else {
-                return 1;
-                break;
-            }
-            return 1;
-            break;
-    }
-    free(test);
 }

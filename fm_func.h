@@ -3,7 +3,7 @@
 
 char *add_file_or_direct(char *new_way, char *directory, char **words, unsigned choice);
 char *test_return(char *input_direct, char *directory, char **words, unsigned choice);
-
+int type_file(char *directory, char **words, unsigned choice, WINDOW **my_wins);
 void * percent_func (void * arg);
 void * cp_func (void * arg);
 char *malloc_array(char *array);
