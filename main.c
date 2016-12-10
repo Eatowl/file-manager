@@ -54,10 +54,10 @@ int main() {
     save_directory = malloc_array(save_directory);
     temporary_directory = malloc_array(temporary_directory);
     test = malloc_array(test);
-    copy_file = (char*) malloc(4096);
-    copy_dir = (char*) malloc(4096);
-    dir_array = (char*) malloc(4096);
-    name_copy_file = (char*) malloc(128);
+    copy_file = (char*) malloc(BUF_SIZE);
+    copy_dir = (char*) malloc(BUF_SIZE);
+    dir_array = (char*) malloc(BUF_SIZE);
+    name_copy_file = (char*) malloc(BUF_READ);
     words = (char**) malloc(SIZE_INCREMENT*sizeof(char*));
 
     unsigned choice = 0;
@@ -137,7 +137,7 @@ int main() {
                             NULL
                     };
                     run = directory_preparation(run, directory, words, choice);
-                    execve (run, newprog_args, NULL);
+                    execve(run, newprog_args, NULL);
                     free(run);
                 }
                 break;
@@ -147,8 +147,8 @@ int main() {
                     int tfd;
                     ssize_t byt;
                     float count = 0;
-                    tfd = open ("type.c", O_RDONLY);
-                    while ((byt = read (tfd, buffer, BUF_READ)) > 0)
+                    tfd = open("type.c", O_RDONLY);
+                    while ((byt = read(tfd, buffer, BUF_READ)) > 0)
                         count++;
                     close (tfd);
 
@@ -163,7 +163,7 @@ int main() {
                     targ.count = count;
                     strcpy(targ.cp_file, copy_file);
 
-                    result = pthread_create (&thread, NULL, &percent_func, &targ);
+                    result = pthread_create(&thread, NULL, &percent_func, &targ);
                 }
                 break;
             case 112: // Нажатие клавиши "P" - вставить файл
@@ -204,31 +204,31 @@ int main() {
                     out_run = directory_preparation(out_run, directory, words, choice);
                 int pf[2], pid1, pid2;
                 char spf [2][32];
-                if (pipe (pf) == -1) {
-                    fprintf (stderr, "pipe() error\n");
+                if (pipe(pf) == -1) {
+                    fprintf(stderr, "pipe() error\n");
                     return 1;
                 }
-                sprintf (spf[0], "%d", pf[0]);
-                sprintf (spf[1], "%d", pf[1]);
+                sprintf(spf[0], "%d", pf[0]);
+                sprintf(spf[1], "%d", pf[1]);
 
-                if ((pid1 = fork ()) == 0) {
-                    dup2 (pf[1], 1);
-                    close (pf[0]);
-                    execlp (in_run, "in", spf[1], NULL);
-                    fprintf (stderr, "exec() [1] error\n");
+                if ((pid1 = fork()) == 0) {
+                    dup2(pf[1], 1);
+                    close(pf[0]);
+                    execlp(in_run, "in", spf[1], NULL);
+                    fprintf(stderr, "exec() [1] error\n");
                     return 1;
                 }
-                if ((pid1 = fork ()) == 0) {
-                    dup2 (pf[0], 0);
-                    close (pf[1]);
-                    execlp (out_run, "out", spf[0], NULL);
-                    fprintf (stderr, "exec() [2] error\n");
+                if ((pid1 = fork()) == 0) {
+                    dup2(pf[0], 0);
+                    close(pf[1]);
+                    execlp(out_run, "out", spf[0], NULL);
+                    fprintf(stderr, "exec() [2] error\n");
                     return 1;
                 }
-                close (pf[1]);
-                waitpid (pid1, NULL, 0);
-                close (pf[0]);
-                waitpid (pid2, NULL, 0);
+                close(pf[1]);
+                waitpid(pid1, NULL, 0);
+                close(pf[0]);
+                waitpid(pid2, NULL, 0);
                 break;
             case KEY_UP:
                 if ( choice != 0 )
