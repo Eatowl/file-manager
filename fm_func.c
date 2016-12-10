@@ -35,7 +35,7 @@ int type_file(char *directory, char **words, unsigned choice, WINDOW **my_wins) 
     int st = 0;
     bool ret = true;
     char *test;
-    test = test_return(test, directory, words, choice);
+    test = directory_preparation(test, directory, words, choice);
     if (words[choice] == ".." || words[choice] == ".") {
         st = 3;
     } else {
@@ -61,7 +61,7 @@ int type_file(char *directory, char **words, unsigned choice, WINDOW **my_wins) 
     free(test);
 }
 
-char *test_return(char *input_direct, char *directory, char **words, unsigned choice) {
+char *directory_preparation(char *input_direct, char *directory, char **words, unsigned choice) {
     unsigned length;
     input_direct = malloc_array(input_direct);
     if (strlen(directory) != 1) {

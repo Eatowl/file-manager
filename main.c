@@ -42,8 +42,6 @@ char *in_run,
 
 struct dirent *entry;
 
-//int type_file(char *directory, char **words, unsigned choice, WINDOW **my_wins);
-
 int main() {
     WINDOW *my_wins[4];
     PANEL  *my_panels[4];
@@ -138,7 +136,7 @@ int main() {
                     char * newprog_args[] = {
                             NULL
                     };
-                    run = test_return(run, directory, words, choice);
+                    run = directory_preparation(run, directory, words, choice);
                     execve (run, newprog_args, NULL);
                     free(run);
                 }
@@ -198,12 +196,12 @@ int main() {
             case 105: // Нажатие клавиши "I" - выбор исполняемой программы для получения входных данных.
                 type_f = type_file(directory, words, choice, my_wins);
                 if (type_f == 2)
-                    in_run = test_return(in_run, directory, words, choice);
+                    in_run = directory_preparation(in_run, directory, words, choice);
                 break;
             case 111: // Нажатие клавиши "O" - выбор исполняемой программы для запуска.
                 type_f = type_file(directory, words, choice, my_wins);
                 if (type_f == 2)
-                    out_run = test_return(out_run, directory, words, choice);
+                    out_run = directory_preparation(out_run, directory, words, choice);
                 int pf[2], pid1, pid2;
                 char spf [2][32];
                 if (pipe (pf) == -1) {
